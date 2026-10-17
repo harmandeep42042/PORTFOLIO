@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #0d0c11;
   --panel: #14131a;
   --panel-light: #1a1821;
@@ -11,6 +11,7 @@
   --display: "Space Grotesk", sans-serif;
 }
 #root { overflow: hidden; }
+:focus-visible { outline: 2px solid var(--lime); outline-offset: 4px; }
 .section-shell, .nav-shell, .footer-inner, .footer-bottom {
   width: min(1160px, calc(100% - 64px));
   margin-inline: auto;
@@ -229,9 +230,10 @@
 .contact-form { min-width: 0; }
 .contact-form label:first-child { margin-top: 0; }
 .contact-form label { color: #c8c1d1; }
-.contact-form input, .contact-form textarea { width: 100%; padding: 12px; border-radius: 7px; border: 1px solid #3b3546; background: #100f15; color: var(--text); font-size: 11px; resize: vertical; }
+
+.contact-form input, .contact-form select, .contact-form textarea { width: 100%; padding: 12px; border-radius: 7px; border: 1px solid #3b3546; background: #100f15; color: var(--text); font-size: 11px; resize: vertical; }
 .contact-form input::placeholder, .contact-form textarea::placeholder { color: #716b7d; }
-.contact-form input:focus, .contact-form textarea:focus { border-color: #9b89c3; outline: 2px solid #9b89c322; }
+.contact-form input:focus, .contact-form select:focus, .contact-form textarea:focus { border-color: #9b89c3; outline: 2px solid #9b89c322; }
 .contact-submit { width: 100%; margin-top: 17px; border: 0; }
 .form-note, .form-status { font-size: 10px; line-height: 1.7; color: #90899a; }
 .form-status { color: #c7e8b5; padding: 10px; border: 1px solid #c0f19f2c; border-radius: 6px; }
@@ -303,4 +305,17 @@
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* Hidden from people, but remains available to catch basic form bots. */
+.contact-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

@@ -77,6 +77,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredDonors = useMemo(() => {
     const normalizedCity = city.trim().toLowerCase();
@@ -87,11 +88,49 @@ function App() {
     });
   }, [bloodGroup, city]);
 
-  function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setFormStatus(
-      "This is a frontend demo. No message was sent. Connect a form service before publishing."
-    );
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+
+    const apiUrl = import.meta.env.VITE_CONTACT_API_URL?.trim();
+    if (!apiUrl) {
+      setFormStatus("Email delivery is not configured yet. Please email harmandeep42042@gmail.com directly.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFormStatus("Sending your inquiry...");
+
+    const formData = new FormData(form);
+    const payload = {
+      inquiryType: String(formData.get("inquiryType") ?? ""),
+      organization: String(formData.get("organization") ?? ""),
+      name: String(formData.get("name") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      project: String(formData.get("project") ?? ""),
+      companyWebsite: String(formData.get("companyWebsite") ?? ""),
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || result?.ok !== true) {
+        throw new Error("Contact submission failed");
+      }
+
+      setFormStatus("Thanks — your inquiry has been sent. I'll get back to you soon.");
+      form.reset();
+    } catch {
+      setFormStatus("Your inquiry could not be sent. Please try again later or email harmandeep42042@gmail.com directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function closeMenu() {
@@ -100,7 +139,7 @@ function App() {
 
   return (
     <>
-      <header className="site-header">
+      <header className="site-header" onKeyDown={(event) => { if (event.key === "Escape") closeMenu(); }}>
         <div className="nav-shell">
           <a className="brand" href="#home" onClick={closeMenu} aria-label="Harmandeep Singh home">
             <span className="brand-mark">h.</span>
@@ -268,7 +307,7 @@ function App() {
                   {project.demoHref ? (
                     <a className="text-link" href={project.demoHref}>Explore interactive demo <span>↘</span></a>
                   ) : (
-                    <span className="project-note">Concept preview — demo link coming soon <span>✳</span></span>
+                    <span className="project-note">Design concept — no live demo yet <span>✳</span></span>
                   )}
                   {project.sourceHref && (
                     <a className="text-link" href={project.sourceHref} target="_blank" rel="noreferrer">View source code <span>↗</span></a>
@@ -400,16 +439,39 @@ function App() {
               <p>Have a website idea, need a web interface or want to discuss a project? Share a few details to get the conversation started.</p>
               <div className="contact-decoration">LET'S BUILD<br /><span>WHAT'S NEXT ↗</span></div>
             </div>
-            <form className="contact-form" onSubmit={handleContactSubmit}>
+                        <form className="contact-form" onSubmit={handleContactSubmit}>
+              <div className="contact-honeypot" aria-hidden="true">
+                <label htmlFor="contact-website">Leave this field empty</label>
+                <input id="contact-website" name="companyWebsite" tabIndex={-1} autoComplete="off" />
+              </div>
+
+              <label htmlFor="contact-type">Type of inquiry</label>
+              <select id="contact-type" name="inquiryType" defaultValue="" required>
+                <option value="" disabled>Select an inquiry type</option>
+                <option value="NGO">NGO / Non-profit</option>
+                <option value="Hospital">Hospital / Healthcare organisation</option>
+                <option value="Business">Business / Company</option>
+                <option value="Individual">Personal project</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <label htmlFor="contact-organization">Organisation name (optional)</label>
+              <input id="contact-organization" name="organization" autoComplete="organization" maxLength={120} placeholder="Your NGO, hospital or company" />
+
               <label htmlFor="contact-name">Your name</label>
-              <input id="contact-name" name="name" placeholder="How should I call you?" required />
-              <label htmlFor="contact-email">Email address</label>
-              <input id="contact-email" name="email" type="email" placeholder="you@example.com" required />
-              <label htmlFor="contact-project">What are you looking to build?</label>
-              <textarea id="contact-project" name="project" placeholder="Tell me a little about your idea..." rows={4} required />
-              <button className="button button-primary contact-submit" type="submit">Preview inquiry <span>↗</span></button>
-              {formStatus && <p className="form-status" role="status">{formStatus}</p>}
-              <p className="form-note">Frontend preview only. This form does not send or store your details.</p>
+              <input id="contact-name" name="name" autoComplete="name" maxLength={100} placeholder="How should I call you?" required />
+
+              <label htmlFor="contact-email">Work or contact email</label>
+              <input id="contact-email" name="email" type="email" autoComplete="email" maxLength={254} placeholder="you@example.com" required />
+
+              <label htmlFor="contact-project">How can I help?</label>
+              <textarea id="contact-project" name="project" placeholder="Tell me about your website, web app or project requirements..." rows={5} minLength={20} maxLength={2000} required />
+
+              <button className="button button-primary contact-submit" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Sending inquiry..." : "Send inquiry"} <span>↗</span>
+              </button>
+              {formStatus && <p className="form-status" role="status" aria-live="polite">{formStatus}</p>}
+              <p className="form-note">Submissions require the configured contact API. Please do not include passwords, payment details or sensitive personal information.</p>
             </form>
           </div>
         </section>
