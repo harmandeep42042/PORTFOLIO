@@ -10,6 +10,8 @@ const projects = [
       "A community-support concept that helps people explore donor search, blood groups and emergency request workflows using clearly labelled sample data.",
     tags: ["React", "TypeScript", "Responsive UI"],
     accent: "coral",
+    demoHref: "#blood-demo",
+    sourceHref: null,
   },
   {
     number: "02",
@@ -19,6 +21,8 @@ const projects = [
       "A clean, conversion-focused website concept for a growing business, with clear services, strong visual hierarchy and direct contact paths.",
     tags: ["Web Design", "Accessibility", "SEO-ready"],
     accent: "violet",
+    demoHref: null,
+    sourceHref: null,
   },
   {
     number: "03",
@@ -28,6 +32,8 @@ const projects = [
       "A dashboard concept that brings key information, activity and useful actions together in a simple, easy-to-navigate workspace.",
     tags: ["UI/UX", "Dashboard", "Frontend"],
     accent: "mint",
+    demoHref: null,
+    sourceHref: null,
   },
 ];
 
@@ -259,10 +265,13 @@ function App() {
                   <div className="tag-row">
                     {project.tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}
                   </div>
-                  {project.number === "01" ? (
-                    <a className="text-link" href="#blood-demo">Explore interactive demo <span>↘</span></a>
+                  {project.demoHref ? (
+                    <a className="text-link" href={project.demoHref}>Explore interactive demo <span>↘</span></a>
                   ) : (
-                    <span className="project-note">Concept project <span>✳</span></span>
+                    <span className="project-note">Concept preview — demo link coming soon <span>✳</span></span>
+                  )}
+                  {project.sourceHref && (
+                    <a className="text-link" href={project.sourceHref} target="_blank" rel="noreferrer">View source code <span>↗</span></a>
                   )}
                 </div>
               </article>
