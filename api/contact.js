@@ -19,7 +19,11 @@ export default async function handler(req, res) {
     (process.env.ALLOWED_ORIGINS || "").split(",").map((item) => item.trim()).filter(Boolean),
   );
 
-  if (!origin || !allowedOrigins.has(origin)) {
+  const isLocalDevOrigin =
+    process.env.NODE_ENV !== "production" &&
+    /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+  if (!origin || (!allowedOrigins.has(origin) && !isLocalDevOrigin)) {
     return sendError(res, 403, "Origin not allowed.");
   }
 
