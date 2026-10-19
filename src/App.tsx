@@ -93,7 +93,7 @@ function App() {
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
 
-    const apiUrl = import.meta.env.VITE_CONTACT_API_URL?.trim();
+    const apiUrl = import.meta.env.VITE_CONTACT_API_URL?.trim() || "/api/contact";
     if (!apiUrl) {
       setFormStatus("Email delivery is not configured yet. Please email harmandeep42042@gmail.com directly.");
       return;
@@ -490,3 +490,4 @@ function App() {
 }
 
 export default App;
+
